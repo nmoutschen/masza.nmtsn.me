@@ -32,7 +32,7 @@ export default {
 .box {
   position: absolute;
   background-image: url("../assets/items.png");
-  background-size: 128px 128px;
+  background-size: 160px 160px;
   &.couch {
     background-position: 0px 0px;
   }
@@ -41,6 +41,9 @@ export default {
   }
   &.dogBed {
     background-position: -96px 0px;  
+  }
+  &.human1 {
+    background-position: -128px 0px;
   }
 
   &.tv {
@@ -56,10 +59,13 @@ export default {
   &.desk {
     background-position: -64px -64px;
   }
+  &.human2 {
+    background-position: -128px -64px;
+  }
 
 
   &.keys {
-    background-position: 0px -96px;
+    background-position: 0px -128px;
   }
 }
 </style>

@@ -5,6 +5,8 @@ function setAnimation(state) {
   // Which animation type to use
   if(state.jumping) {
     state.animation.type = "jumping";
+  } else if(state.keys.action) {
+    state.animation.type = "giving-paw";
   } else if(state.keys.left || state.keys.right) {
     state.animation.type = "walking";
   } else {
@@ -68,7 +70,8 @@ export default {
     keys: {
       left: false,
       right: false,
-      jump: false
+      jump: false,
+      action: false
     }
   },
   getters: {
@@ -94,6 +97,9 @@ export default {
         case 39: // Right
           state.keys.right = true;
           break;
+        case 69: // e
+          state.keys.action = true;
+          break;
       }
     },
     keyUp(state, key) {
@@ -106,6 +112,9 @@ export default {
           break;
         case 39: // Right
           state.keys.right = false;
+          break;
+        case 69: // e
+          state.keys.action = false;
           break;
       }
     },
@@ -191,7 +200,7 @@ export default {
       commit("nextTick", rootState);
     },
     setup({ state, rootState }) {
-      state.pos.x = rootState.width/2;
+      state.pos.x = 32;
       state.pos.y = rootState.height;
     },
     collides({ getters }, other) {

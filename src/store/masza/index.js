@@ -147,6 +147,7 @@ export default {
       }
       rootState.items.forEach(item => {
         if(
+          item.physics &&
           box.fromX < item.collisionBox.toX &&
           box.toX > item.collisionBox.fromX &&
           box.fromY < item.collisionBox.toY &&

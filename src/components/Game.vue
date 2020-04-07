@@ -2,7 +2,7 @@
    <div id="game">
       <Masza/>
       <Item v-for="item in items" :key="item.id" v-bind="item" />
-      <p id="debug">
+      <p id="debug" v-if="devMode">
         pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
         force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})
       </p>
@@ -26,6 +26,9 @@ export default {
   computed: {
     items() {
       return this.$store.state.items;
+    },
+    devMode() {
+      return process.env.NODE_ENV == "development"
     }
   },
   data: () => {

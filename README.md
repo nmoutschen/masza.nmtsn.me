@@ -1,4 +1,10 @@
-# nmtsn.me
+# masza.nmtsn.me
+
+<p align="center">
+  <img alt="Animation test" src="images/masza_walk_test2.gif"/>
+</p>
+
+Experimentation with 1-bit graphics. Controls are `left`, `right` and `space bar`.
 
 ## Project setup
 ```
@@ -19,6 +25,3 @@ npm run build
 ```
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -1,5 +1,5 @@
 <template>
-  <div class="box" :class="boxClass" :style="boxStyle">
+  <div class="box" :class="type" :style="boxStyle">
   </div>
 </template>
 
@@ -10,31 +10,20 @@ export default {
     boxStyle() {
       var boxStyle = "";
       boxStyle += "height: " + this.height + "px;";
-      boxStyle += "width: " + this.width +"px;";
+      boxStyle += "width: " + this.width + "px;";
       boxStyle += "top: " + (this.pos.y-this.height) + "px;";
       boxStyle += "left: " + (this.pos.x-(this.width/2)) + "px;";
       return boxStyle;
-    },
-    boxClass() {
-      var boxClass = "";
-      if(this.active) {
-        boxClass += " active";
-      }
-      return boxClass
-    }
-  },
-  data() {
-    return {
-      width: 32,
-      height: 32
     }
   },
   props: {
+    type: String,
+    width: Number,
+    height: Number,
     pos: {
       x: Number,
       y: Number
-    },
-    type: String
+    }
   }
 }
 </script>
@@ -42,10 +31,20 @@ export default {
 <style lang="scss">
 .box {
   position: absolute;
-  background-color: #44f;
+  background-image: url("../assets/items.png");
+  background-size: 96px 96px;
+  &.couch {
+    background-position: 0px 0px;
+  }
+  &.tv {
+    background-position: 0px -32px;
+  }
+  &.tvStand {
+    background-position: 0px -64px;
+  }
 
-  &.active {
-    background-color: #f00;
+  &.ball {
+    background-position: -64px 0px;
   }
 }
 </style>

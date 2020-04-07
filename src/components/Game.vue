@@ -1,17 +1,16 @@
 <template>
    <div id="game">
       <Masza/>
-      <Box v-for="item in items" :key="item.id" v-bind:pos="item.pos" />
+      <Item v-for="item in items" :key="item.id" v-bind="item" />
       <p id="debug">
         pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
-        force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})<br/>
-        jumping: {{this.$store.state.masza.jumping}}
+        force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})
       </p>
     </div>
 </template>
 
 <script>
-import Box from "./Box.vue";
+import Item from "./Item.vue";
 import Masza from "./Masza.vue";
 
 function tick(component) {
@@ -21,7 +20,7 @@ function tick(component) {
 export default {
   name: "Game",
   components: {
-    Box,
+    Item,
     Masza
   },
   computed: {

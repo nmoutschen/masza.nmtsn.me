@@ -156,7 +156,7 @@ export default {
             x: state.pos.x - item.pos.x,
             y: state.pos.y - item.pos.y
           }
-          if(Math.abs(vector.x) > Math.abs(vector.y)) {
+          if(Math.abs(vector.x)/item.width > Math.abs(vector.y)/item.height) {
             if(vector.x > 0) {
               state.pos.x += (state.width+item.width)/2 - vector.x;
             } else {

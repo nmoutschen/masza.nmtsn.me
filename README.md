@@ -1,4 +1,4 @@
-# masza.nmtsn.me
+# Masza Simulator
 
 <p align="center">
   <img alt="Animation test" src="images/masza_test1.gif"/>

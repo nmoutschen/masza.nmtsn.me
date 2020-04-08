@@ -1,66 +1,61 @@
 const MAX_FORCE_HORIZ = 8;
 const FORCE_JUMP = 12;
-const CAMERA_MARGIN = 128;
 
-function detectCollisionWithItem(state, box, item) {
-  if(
-    item.physics &&
-    box.fromX < item.collisionBox.toX &&
-    box.toX > item.collisionBox.fromX &&
-    box.fromY < item.collisionBox.toY &&
-    box.toY > item.collisionBox.fromY
-  ) {
-    var vector = {
-      x: state.pos.x - item.pos.x,
-      y: state.pos.y - item.pos.y
-    }
-    if(Math.abs(vector.x)/item.width > Math.abs(vector.y)/item.height) {
-      if(vector.x > 0) {
-        state.pos.x += (state.width+item.width)/2 - vector.x;
-      } else {
-        state.pos.x += - (state.width+item.width)/2 - vector.x;
-      }
-      state.force.x = 0;
-    } else {
-      if(vector.y > 0) {
-        state.pos.y += (state.height+item.height)/2 - vector.y;
-      } else {
-        state.pos.y += - (state.height+item.height)/2 - vector.y;
-      state.jumping = false;
-      }
-      state.force.y = 0;
-    }
-  }
-}
-
-function detectCollisions(state, rootState) {
-  // Environment collision
-  if(state.pos.x > rootState.width-state.width/2) {
-    state.pos.x = rootState.width-state.width/2;
-    state.force.x = 0;
-  } else if(state.pos.x < state.width/2) {
-    state.pos.x = state.width/2;
-    state.force.x = 0;
-  }
-  if(state.pos.y >= rootState.height) {
-    state.pos.y = rootState.height;
-    state.force.y = 0;
-    state.jumping = false;
-  } else if(state.pos.y < state.height) {
-    state.pos.y = state.height;
-    state.force.y = 0;
-  }
-
-  // Collision with items
+function detectCollisionWithItems(state, items) {
   const box = {
     fromX: state.pos.x - state.width/2,
     toX: state.pos.x + state.width/2,
     fromY: state.pos.y - state.height,
     toY: state.pos.y
   }
-  rootState.items.forEach(item => {
-    detectCollisionWithItem(state, box, item);
+  items.forEach(item => {
+    if(
+      item.physics &&
+      box.fromX < item.collisionBox.toX &&
+      box.toX > item.collisionBox.fromX &&
+      box.fromY < item.collisionBox.toY &&
+      box.toY > item.collisionBox.fromY
+    ) {
+      var vector = {
+        x: state.pos.x - item.pos.x,
+        y: state.pos.y - item.pos.y
+      }
+      if(Math.abs(vector.x)/item.width > Math.abs(vector.y)/item.height) {
+        if(vector.x > 0) {
+          state.pos.x += (state.width+item.width)/2 - vector.x;
+        } else {
+          state.pos.x += - (state.width+item.width)/2 - vector.x;
+        }
+        state.force.x = 0;
+      } else {
+        if(vector.y > 0) {
+          state.pos.y += (state.height+item.height)/2 - vector.y;
+        } else {
+          state.pos.y += - (state.height+item.height)/2 - vector.y;
+        state.jumping = false;
+        }
+        state.force.y = 0;
+      }
+    }
   });
+}
+
+function detectCollisionWithEnvironment(state, game) {
+  if(state.pos.x > game.width-state.width/2) {
+    state.pos.x = game.width-state.width/2;
+    state.force.x = 0;
+  } else if(state.pos.x < state.width/2) {
+    state.pos.x = state.width/2;
+    state.force.x = 0;
+  }
+  if(state.pos.y >= game.height) {
+    state.pos.y = game.height;
+    state.force.y = 0;
+    state.jumping = false;
+  } else if(state.pos.y < state.height) {
+    state.pos.y = state.height;
+    state.force.y = 0;
+  }
 }
 
 function move(state) {
@@ -86,28 +81,6 @@ function setAnimation(state) {
     state.animation.flipped = true;
   } else if(!state.keys.left && state.keys.right) {
     state.animation.flipped = false;
-  }
-}
-
-function updateCamera(state, rootState) {
-  // Move camera left
-  if(
-    state.pos.x - rootState.camera.pos.x < CAMERA_MARGIN &&
-    rootState.camera.pos.x > 0
-  ) {
-    rootState.camera.pos.x = Math.max(
-      state.pos.x - CAMERA_MARGIN,
-      0
-    )
-  // Move camera right
-  } else if(
-    state.pos.x > rootState.camera.pos.x + rootState.camera.width - CAMERA_MARGIN &&
-    rootState.camera.pos.x < rootState.width - rootState.camera.width
-  ) {
-    rootState.camera.pos.x = Math.min(
-      state.pos.x - rootState.camera.width + CAMERA_MARGIN,
-      rootState.width - rootState.camera.width
-    )
   }
 }
 
@@ -216,28 +189,17 @@ export default {
       move(state);
 
       // Collision
-      detectCollisions(state, rootState);
+      detectCollisionWithEnvironment(state, rootState.game);
+      detectCollisionWithItems(state, rootState.items);
 
       // Update forces
       updateForces(state);
-
-      // Update camera
-      updateCamera(state, rootState);
     }
   },
   actions: {
-    keyUp({ commit }, key) {
-      commit("keyUp", key);
-    },
-    keyDown({ commit }, key) {
-      commit("keyDown", key);
-    },
-    nextTick({ commit, rootState }) {
-      commit("nextTick", rootState);
-    },
     setup({ state, rootState }) {
       state.pos.x = 32;
-      state.pos.y = rootState.height;
+      state.pos.y = rootState.game.height;
     },
     collides({ getters }, other) {
       const box = getters.collisionBox;

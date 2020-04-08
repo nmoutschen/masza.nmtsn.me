@@ -1,12 +1,14 @@
 <template>
-   <div id="game">
+  <div id="game">
+    <div id="gameView" :style="gameViewStyle">
       <Masza/>
       <Item v-for="item in items" :key="item.id" v-bind="item" />
-      <p id="debug" v-if="devMode">
+    </div>
+    <p id="debug" v-if="devMode">
         pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
         force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})
       </p>
-    </div>
+  </div>
 </template>
 
 <script>
@@ -29,6 +31,12 @@ export default {
     },
     devMode() {
       return process.env.NODE_ENV == "development"
+    },
+    gameViewStyle() {
+      var style = "";
+      style += "top: " + (-this.$store.state.camera.pos.y) + "px;";
+      style += "left: " + (-this.$store.state.camera.pos.x) + "px;";
+      return style;
     }
   },
   data: () => {
@@ -66,5 +74,12 @@ export default {
   width: 512px;
   height: 512px;
   border-bottom: 2px solid #fff;
+  overflow: hidden;
+
+  #gameView {
+    position: absolute;
+    width: 512px;
+    height: 512px;
+  }
 }
 </style>

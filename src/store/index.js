@@ -8,8 +8,16 @@ import Item from '../resources/item.js';
 
 export default new Vuex.Store({
   state: {
-    width: 512,
+    width: 1024,
     height: 512,
+    camera: {
+      width: 512,
+      height: 512,
+      pos: {
+        x: 0,
+        y: 0,
+      }
+    },
     items: [
       new Item("couch", 64, 32, {x: 32, y: 512}),
       new Item("dogBed", 32, 32, {x: 112, y: 512}, false),

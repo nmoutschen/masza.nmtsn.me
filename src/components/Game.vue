@@ -1,5 +1,5 @@
 <template>
-  <div id="game">
+  <div id="game" :style="gameStyle">
     <div id="gameView" :style="gameViewStyle">
       <Masza/>
       <Item v-for="item in items" :key="item.id" v-bind="item" />
@@ -27,13 +27,21 @@ export default {
   },
   computed: {
     items() {
-      return this.$store.state.items;
+      return this.$store.state.game.items;
     },
     devMode() {
       return process.env.NODE_ENV == "development"
     },
+    gameStyle() {
+      var style = "";
+      style += "width: " + this.$store.state.camera.width + "px;";
+      style += "height: " + this.$store.state.camera.height + "px;";
+      return style;
+    },
     gameViewStyle() {
       var style = "";
+      style += "width: " + this.$store.state.camera.width + "px;";
+      style += "height: " + this.$store.state.camera.height + "px;";
       style += "top: " + (-this.$store.state.camera.pos.y) + "px;";
       style += "left: " + (-this.$store.state.camera.pos.x) + "px;";
       return style;
@@ -71,15 +79,12 @@ export default {
 <style lang="scss">
 #game {
   position: relative;
-  width: 512px;
-  height: 512px;
+  margin: 0px auto;
   border-bottom: 2px solid #fff;
   overflow: hidden;
 
   #gameView {
     position: absolute;
-    width: 512px;
-    height: 512px;
   }
 }
 </style>

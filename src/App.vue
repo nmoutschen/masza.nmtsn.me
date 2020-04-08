@@ -39,8 +39,5 @@ a {
 }
 
 #app {
-  position: relative;
-  width: 512px;
-  margin: 0px auto;
 }
 </style>

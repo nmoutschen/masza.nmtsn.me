@@ -190,7 +190,7 @@ export default {
 
       // Collision
       detectCollisionWithEnvironment(state, rootState.game);
-      detectCollisionWithItems(state, rootState.items);
+      detectCollisionWithItems(state, rootState.game.items);
 
       // Update forces
       updateForces(state);

@@ -1,8 +1,8 @@
 <template>
   <div id="game" :style="gameStyle">
     <div id="gameView" :style="gameViewStyle">
-      <Masza/>
-      <Item v-for="item in items" :key="item.id" v-bind:item="item" />
+      <div :style="masza.style"></div>
+      <div v-for="item in items" :key="item.id" :style="item.style" />
     </div>
     <p id="debug" v-if="devMode">
         pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
@@ -12,20 +12,16 @@
 </template>
 
 <script>
-import Item from "./Item.vue";
-import Masza from "./Masza.vue";
-
 function tick(component) {
   component.$store.dispatch("nextTick");
 }
 
 export default {
   name: "Game",
-  components: {
-    Item,
-    Masza
-  },
   computed: {
+    masza() {
+      return this.$store.state.masza;
+    },
     items() {
       return this.$store.state.game.items;
     },

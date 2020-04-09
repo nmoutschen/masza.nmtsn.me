@@ -5,7 +5,7 @@ Vue.use(Vuex)
 
 import camera from './camera.js';
 import game from './game/index.js';
-import masza from './masza.js';
+import masza from './masza/index.js';
 
 export default new Vuex.Store({
   state: {

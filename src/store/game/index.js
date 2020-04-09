@@ -1,4 +1,4 @@
-import home from './home.json';
+import world from './world.json';
 
 var counter = 0;
 
@@ -64,5 +64,5 @@ function parseWorld(world) {
 }
 
 export default {
-  state: parseWorld(home)
+  state: parseWorld(world)
 }

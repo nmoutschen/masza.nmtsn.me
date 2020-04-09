@@ -1,5 +1,4 @@
-const MAX_FORCE_HORIZ = 8;
-const FORCE_JUMP = 12;
+import masza from "./masza.json";
 
 function detectCollisionWithItems(state, items) {
   const box = {
@@ -72,7 +71,7 @@ function setAnimation(state) {
   } else if(state.keys.left || state.keys.right) {
     state.animation.type = "walking";
   } else if(state.keys.action) {
-    state.animation.type = "giving-paw";
+    state.animation.type = "givingPaw";
   } else {
     state.animation.type = "sitting";
   }
@@ -88,9 +87,9 @@ function setAnimation(state) {
 function updateForces(state) {
   // Apply horizontal forces
   if(state.keys.left && !state.keys.right) {
-    state.force.x = Math.max(state.force.x-2, -MAX_FORCE_HORIZ);
+    state.force.x = Math.max(state.force.x-2, -state.force.maxX);
   } else if (!state.keys.left && state.keys.right) {
-    state.force.x = Math.min(state.force.x+2, MAX_FORCE_HORIZ);
+    state.force.x = Math.min(state.force.x+2, state.force.maxX);
   } else if(state.force.x > 0 && !state.jumping) {
     state.force.x--;
   } else if(state.force.x < 0 && !state.jumping) {
@@ -99,41 +98,94 @@ function updateForces(state) {
 
   // Apply vertical forces
   if(state.keys.jump && !state.jumping) {
-    state.force.y = -FORCE_JUMP;
+    state.force.y = -state.force.maxY;
     state.jumping = true;
   } else {
     state.force.y++;
   }
 }
 
-export default {
-  state: {
+function parseMasza(masza) {
+  return {
+    width: masza.width,
+    height: masza.height,
+    sprite: masza.sprite,
+    spriteImg: require(`./${masza.sprite.img}`),
     frameCounter: 0,
-    jumping: false,
     animation: {
-      type: "sitting",
+      type: masza.defaultAction,
       flipped: false,
       altFrame: false
     },
-    width: 32,
-    height: 32,
     pos: {
-      x: 0,
-      y: 0
+      x: 0, y: 0
     },
     force: {
       x: 0,
-      y: 0
+      y: 0,
+      maxX: masza.force.maxX || 8,
+      maxY: masza.force.maxY || 12
     },
     keys: {
       left: false,
       right: false,
       jump: false,
       action: false
+    },
+    actions: masza.actions,
+    variants: masza.variants,
+    get style() {
+      var maszaStyle = `
+        position: absolute;
+        z-index: 1;
+        background-image: url("${this.spriteImg}");
+        background-size: ${this.sprite.x}px ${this.sprite.y}px;
+        height: ${this.height}px;
+        width: ${this.width}px;
+        top: ${this.pos.y - this.height}px;
+        left: ${this.pos.x - this.width/2}px;
+      `;
+      // Parse the variant (e.g. alternative frame)
+      if(
+        this.animation.altFrame &&
+        this.variants !== undefined &&
+        this.variants.altFrame !== undefined
+      ) {
+        maszaStyle += actionStyle(this.variants.altFrame);
+      }
+
+      // Parse the action
+      if(
+        masza.actions !== undefined &&
+        masza.actions[this.animation.type] !== undefined
+      ) {
+        maszaStyle += actionStyle(this.actions[this.animation.type]);
+      }
+
+      // Flip the image if necessary
+      if(this.animation.flipped) {
+        maszaStyle += "-moz-transform: scaleX(-1);-o-transform: scaleX(-1);-webkit-transform: scaleX(-1);transform: scaleX(-1);";
+      }
+      return maszaStyle;
     }
-  },
+  }
+}
+
+function actionStyle(action) {
+  var style = "";
+  if(action.x !== undefined) {
+    style += `background-position-x: ${-action.x}px;`
+  }
+  if(action.y !== undefined) {
+    style += `background-position-y: ${-action.y}px;`
+  }
+  return style;
+}
+
+export default {
+  state: parseMasza(masza),
   getters: {
-    collisionBox(state) {
+    maszaCollisionBox(state) {
       // Returns the (x, y) coordinates that form the collision box.
       return {
         fromX: state.pos.x - state.width/2,
@@ -141,6 +193,40 @@ export default {
         fromY: state.pos.y - state.height,
         toY: state.pos.y
       }
+    },
+    maszaStyle(state) {
+      var maszaStyle = `
+        position: absolute;
+        z-index: 1;
+        background-image: url("${state.spriteImg}");
+        background-size: ${state.sprite.x}px ${state.sprite.y}px;
+        height: ${state.height}px;
+        width: ${state.width}px;
+        top: ${state.pos.y - state.height}px;
+        left: ${state.pos.x - state.width/2}px;
+      `;
+      // Parse the variant (e.g. alternative frame)
+      if(
+        state.animation.altFrame &&
+        state.variants !== undefined &&
+        state.variants.altFrame !== undefined
+      ) {
+        maszaStyle += actionStyle(state.variants.altFrame);
+      }
+
+      // Parse the action
+      if(
+        masza.actions !== undefined &&
+        masza.actions[state.animation.type] !== undefined
+      ) {
+        maszaStyle += actionStyle(state.actions[state.animation.type]);
+      }
+
+      // Flip the image if necessary
+      if(state.animation.flipped) {
+        maszaStyle += "-moz-transform: scaleX(-1);-o-transform: scaleX(-1);-webkit-transform: scaleX(-1);transform: scaleX(-1);";
+      }
+      return maszaStyle;
     }
   },
   mutations: {

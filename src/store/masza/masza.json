@@ -1,0 +1,33 @@
+{
+  "width": 32,
+  "height": 32,
+  "sprite": {
+    "x": 128,
+    "y": 64,
+    "img": "masza.png"
+  },
+  "defaultAction": "sitting",
+  "actions": {
+    "sitting": {
+      "x": 0
+    },
+    "givingPaw": {
+      "x": 32
+    },
+    "walking": {
+      "x": 64
+    },
+    "jumping": {
+      "x": 96
+    }
+  },
+  "variants": {
+    "altFrame": {
+      "y": 32
+    }
+  },
+  "force": {
+    "maxY": 12,
+    "maxX": 8
+  }
+}

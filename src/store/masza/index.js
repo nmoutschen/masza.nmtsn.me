@@ -70,6 +70,8 @@ function setAnimation(state) {
     state.animation.type = "jumping";
   } else if(state.keys.left || state.keys.right) {
     state.animation.type = "walking";
+  } else if(state.keys.down) {
+    state.animation.type = "lyingDown";
   } else if(state.keys.action) {
     state.animation.type = "givingPaw";
   } else {
@@ -91,9 +93,15 @@ function updateForces(state) {
   } else if (!state.keys.left && state.keys.right) {
     state.force.x = Math.min(state.force.x+2, state.force.maxX);
   } else if(state.force.x > 0 && !state.jumping) {
-    state.force.x--;
+    state.force.x = Math.max(state.force.x-1, 0);
+    if(state.keys.down && state.force.x > 0) {
+      state.force.x = Math.max(state.force.x-1, 0);
+    }
   } else if(state.force.x < 0 && !state.jumping) {
-    state.force.x++;
+    state.force.x = Math.min(state.force.x+1, 0);
+    if(state.keys.down && state.force.x < 0) {
+      state.force.x = Math.min(state.force.x+1, 0);
+    }
   }
 
   // Apply vertical forces
@@ -101,7 +109,10 @@ function updateForces(state) {
     state.force.y = -state.force.maxY;
     state.jumping = true;
   } else {
-    state.force.y++;
+    state.force.y = Math.min(state.force.y+1, state.force.maxY);
+  }
+  if(state.jumping && state.keys.down) {
+    state.force.y = Math.min(state.force.y+1, state.force.maxY);
   }
 }
 
@@ -129,6 +140,7 @@ function parseMasza(masza) {
     keys: {
       left: false,
       right: false,
+      down: false,
       jump: false,
       action: false
     },
@@ -241,6 +253,9 @@ export default {
         case 39: // Right
           state.keys.right = true;
           break;
+        case 40: // Down
+          state.keys.down = true;
+          break;
         case 69: // e
           state.keys.action = true;
           break;
@@ -256,6 +271,9 @@ export default {
           break;
         case 39: // Right
           state.keys.right = false;
+          break;
+        case 40: // Down
+          state.keys.down = false;
           break;
         case 69: // e
           state.keys.action = false;

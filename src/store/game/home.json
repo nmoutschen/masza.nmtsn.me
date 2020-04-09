@@ -1,51 +1,104 @@
 {
   "width": 1024,
   "height": 512,
+  "sprite": {
+    "img": "items.png",
+    "x": 256,
+    "y": 256
+  },
   "itemTypes": {
+    "ball": {
+      "width": 32,
+      "height": 32,
+      "sprite": {
+        "x": 64,
+        "y": 0
+      }
+    },
     "couch": {
       "width": 64,
-      "height": 32
+      "height": 32,
+      "sprite": {
+        "x": 0,
+        "y": 0
+      }
     },
     "dogBed": {
       "width": 32,
       "height": 32,
+      "sprite": {
+        "x": 96,
+        "y": 0
+      },
       "physics": false
     },
     "tvStand": {
       "width": 64,
-      "height": 32
+      "height": 32,
+      "sprite": {
+        "x": 0,
+        "y": 64
+      }
     },
     "tv": {
       "width": 64,
-      "height": 32
+      "height": 32,
+      "sprite": {
+        "x": 0,
+        "y": 32
+      }
     },
     "desk": {
       "width": 64,
-      "height": 32
+      "height": 32,
+      "sprite": {
+        "x": 64,
+        "y": 64
+      }
     },
     "deskTop": {
       "width": 64,
       "height": 32,
+      "sprite": {
+        "x": 64,
+        "y": 32
+      },
       "physics": false
     },
     "human1": {
       "width": 32,
       "height": 64,
+      "sprite": {
+        "x": 128,
+        "y": 0
+      },
       "physics": false
     },
     "human2": {
       "width": 32,
       "height": 64,
+      "sprite": {
+        "x": 128,
+        "y": 64
+      },
       "physics": false
     },
     "keys": {
       "width": 160,
       "height": 32,
+      "sprite": {
+        "x": 0,
+        "y": 128
+      },
       "physics": false
     },
     "title": {
       "width": 256,
       "height": 32,
+      "sprite": {
+        "x": 0,
+        "y": 224
+      },
       "physics": false
     }
   },

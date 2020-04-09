@@ -9,12 +9,13 @@ function detectCollisionWithItems(state, items) {
     toY: state.pos.y
   }
   items.forEach(item => {
+    const collisionBox = item.collisionBox;
     if(
       item.physics &&
-      box.fromX < item.collisionBox.toX &&
-      box.toX > item.collisionBox.fromX &&
-      box.fromY < item.collisionBox.toY &&
-      box.toY > item.collisionBox.fromY
+      box.fromX < collisionBox.toX &&
+      box.toX > collisionBox.fromX &&
+      box.fromY < collisionBox.toY &&
+      box.toY > collisionBox.fromY
     ) {
       var vector = {
         x: state.pos.x - item.pos.x,

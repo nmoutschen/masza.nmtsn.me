@@ -2,7 +2,7 @@
   <div id="game" :style="gameStyle">
     <div id="gameView" :style="gameViewStyle">
       <Masza/>
-      <Item v-for="item in items" :key="item.id" v-bind="item" />
+      <Item v-for="item in items" :key="item.id" v-bind:item="item" />
     </div>
     <p id="debug" v-if="devMode">
         pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>

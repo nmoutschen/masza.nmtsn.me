@@ -10,11 +10,12 @@ function detectCollisionWithItems(masza, items) {
     // of them.
     // For 'top' items, we take the previous known position (roughly equal to the
     // current position minus force) and check if the y coordinate is above the top
-    // of the item.
+    // of the item. We also check if the 'down' key is not pressed, as it allows to
+    // pass through 'top' objects.
     if(
       (
         item.physics == "block" ||
-        (item.physics == "top" && masza.pos.y - masza.force.y <= item.box.top)
+        (item.physics == "top" && masza.pos.y - masza.force.y <= item.box.top && !masza.keys.down)
       ) &&
       masza.box.collides(item.box)
     ) {
@@ -76,19 +77,23 @@ function detectCollisionWithEnvironment(masza, game) {
   // those boxes. If so, this pushes her back into the game world.
 
   // Horizontal detection
+  // Right boundary
   if(masza.box.right > game.width) {
     masza.pos.x = game.width-masza.width/2;
     masza.force.x = 0;
+  // Left boundary
   } else if(masza.box.left < 0) {
     masza.pos.x = masza.width/2;
     masza.force.x = 0;
   }
 
   // Vertical detection
+  // Bottom boundary
   if(masza.box.bottom > game.height) {
     masza.pos.y = game.height;
     masza.force.y = 0;
     masza.jumping = false;
+  // Top boundary
   } else if(masza.box.top < 0) {
     masza.pos.y = masza.height;
     masza.force.y = 0;
@@ -360,7 +365,7 @@ export default {
 
       // Collision
       detectCollisionWithEnvironment(state, rootState.game);
-      detectCollisionWithItems(state, rootState.game.items);
+      detectCollisionWithItems(state, rootState.game.itemsWithin(state.box));
 
       // Update forces
       updateForces(state);

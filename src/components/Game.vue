@@ -26,7 +26,7 @@ export default {
       return this.$store.state.masza;
     },
     items() {
-      return this.$store.state.game.items;
+      return this.$store.state.game.itemsWithin(this.$store.state.camera.box);
     },
     devMode() {
       return process.env.NODE_ENV == "development"
@@ -38,12 +38,7 @@ export default {
       return style;
     },
     gameViewStyle() {
-      var style = "";
-      style += "width: " + this.$store.state.camera.width + "px;";
-      style += "height: " + this.$store.state.camera.height + "px;";
-      style += "top: " + (-this.$store.state.camera.pos.y) + "px;";
-      style += "left: " + (-this.$store.state.camera.pos.x) + "px;";
-      return style;
+      return this.$store.state.camera.style;
     }
   },
   data: () => {
@@ -66,10 +61,10 @@ export default {
     window.addEventListener('keyup', this.keyUp, false);
     this.mainGraphicsLoop = setInterval(() => {
       nextGraphicsTick(this);
-    }, 125);
+    }, 120);
     this.mainPhysicsLoop = setInterval(() => {
       nextPhysicsTick(this);
-    }, 25);
+    }, 30);
   },
   destroyed() {
     window.removeEventListener('keydown', this.keyDown);

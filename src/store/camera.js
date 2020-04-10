@@ -47,6 +47,22 @@ export default {
     pos: {
       x: 0,
       y: 0,
+    },
+    get box() {
+      return {
+        left: this.pos.x,
+        right: this.pos.x + this.width,
+        top: this.pos.y,
+        bottom: this.pos.y + this.height
+      }
+    },
+    get style() {
+      return `
+        width: ${this.width}px;
+        height: ${this.height}px;
+        top: ${-this.pos.y}px;
+        left: ${-this.pos.x}px;
+      `;
     }
   },
   mutations: {

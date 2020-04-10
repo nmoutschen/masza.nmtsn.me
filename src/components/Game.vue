@@ -1,5 +1,5 @@
 <template>
-  <div id="game" :style="gameStyle">
+  <div id="game" :style="gameStyle" :class="{ devMode }">
     <div id="gameView" :style="gameViewStyle">
       <div :style="masza.style"></div>
       <div v-for="item in items" :key="item.id" :style="item.style" />
@@ -81,6 +81,12 @@ export default {
   margin: 0px auto;
   border-bottom: 2px solid #fff;
   overflow: hidden;
+
+  &.devMode {
+    border-left: 2px solid #f00;
+    border-right: 2px solid #f00;
+    overflow: visible;
+  }
 
   #gameView {
     position: absolute;

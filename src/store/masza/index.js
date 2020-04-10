@@ -9,75 +9,90 @@ const KEYMAP = {
 }
 
 function detectCollisionWithItems(masza, items) {
-  items.forEach(item => {
-    // Collision between Masza and an item only applies if the item has a 'block'
-    // physics or 'top' physics and Masza was previously above the item.
-    //
-    // In the case of 'block' physics, the item cannot be traversed by Masza.
-    // For 'top' physics, Masza can traverse the item except when landing on top
-    // of them.
-    // For 'top' items, we take the previous known position (roughly equal to the
-    // current position minus force) and check if the y coordinate is above the top
-    // of the item. We also check if the 'down' key is not pressed, as it allows to
-    // pass through 'top' objects.
-    if(
-      (
-        item.physics == "block" ||
-        (item.physics == "top" && masza.pos.y - masza.force.y <= item.box.top && !masza.keys.down)
-      ) &&
-      masza.box.collides(item.box)
-    ) {
-      // Calculate the vector representing the different between Masza's forward
-      // pointing corner and the item's backward pointing corner. These corners are
-      // based on Masza's force.
-      //
-      // For example, if Masza's force vector is pointing left and upwards, we take
-      // the bottom-right corner of the time substracted by the top-left corner for
-      // Masza.
-      //
-      // This vector represents a rectangle. From there, we take the opposite vector
-      // to Masza's force vector and find the intersection between the rectangle and
-      const vector = {
-        // Rightward force: Masza's right side, item's left side
-        // Leftward force: Masza's left side, item's right side
-        x: masza.force.x >= 0 ? item.box.left - masza.box.right : item.box.right - masza.box.left,
-        // Downward force: Masza's bottom side, item's top side
-        // Upward force: Masza's top side, item's bottom side
-        y: masza.force.y >= 0 ? item.box.top - masza.box.bottom : item.box.bottom - masza.box.top
-      };
 
-      // Take the opposite of Masza's force vector to find the previous position, and
-      // thus the intersection point between Masza and the item based on her force vector.
-      const force = {
-        x: -masza.force.x,
-        y: -masza.force.y
-      };
-
-      // If the ratio is higher horizontally, we use the horizontal ratio to calculate
-      // the minimal movement needed to bring Masza out of the item.
-      const move = {
-        x: Math.ceil(force.x/vector.x >= force.y/vector.y ? vector.x : force.x * (vector.y / force.y)),
-        y: Math.ceil(force.x/vector.x >= force.y/vector.y ? force.y * (vector.x / force.x) : vector.y)
-      }
-
-      // Move only according to the strongest destination. This allows to slide across an item
-      // while pressed against it (e.g. jumping while pressing right while right to the left of
-      // an item).
-      if(item.physics == "block" && force.x/vector.x >= force.y/vector.y) {
-        masza.pos.x += move.x;
-        masza.force.x = 0;
-      
-      } else {
-        masza.pos.y += move.y;
-        // If the y force is positive, Masza is coming from above, therefore this counts as a
-        // ground collision and resets the jumping flag.
-        if (masza.force.y > 0) {
-          masza.jumping = false;
-        }
-        masza.force.y = 0;
-      }
-    }
+  var collidingItems = items.filter(item => {
+    return masza.collides(item);
+  })
+  // When there are multiple colliding items, sort them based on the edge-to-edge distance.
+  // Compared to a center point distance, this ensures that we are looking at the item that
+  // is colliding the most (as in, with the largest number of pixel) first. This prevents bugs
+  // where Masza's position and force are altered by an item that is further away from her
+  // than another one.
+  //
+  // As we are only looking at items that are colliding with Masza, we compare the distance to
+  // the same edge (left-to-left, top-to-top, etc.) rather than opposite edges, as one might do
+  // if the objects were not colliding. Doing so prevents bugs where Masza is corner-to-corner to
+  // an object, while on the edge of another one. In this case, the one on the edge should be
+  // handled first, then the one on the edge, if necessary.
+  .sort((a, b) => {
+    return (
+      Math.min(Math.pow(masza.box.left-b.box.left, 2), Math.pow(masza.box.right-b.box.right, 2)) + 
+      Math.min(Math.pow(masza.box.top-b.box.top, 2), Math.pow(masza.box.bottom-b.box.bottom, 2)) -
+      Math.min(Math.pow(masza.box.left-a.box.left, 2), Math.pow(masza.box.right-a.box.right, 2)) -
+      Math.min(Math.pow(masza.box.top-a.box.top, 2), Math.pow(masza.box.bottom-a.box.bottom, 2))
+    );
   });
+
+  while(collidingItems.length > 0) {
+    // Resolve collision for the closest item first
+    const item = collidingItems.pop(0);
+
+    // It's possible that resolving the collision for another item solved the collision for this
+    // item too. Therefore, we first need to check if the item still collides.
+    if(!masza.collides(item)) {
+      continue;
+    }
+
+    // Calculate the vector representing the different between Masza's forward
+    // pointing corner and the item's backward pointing corner. These corners are
+    // based on Masza's force.
+    //
+    // For example, if Masza's force vector is pointing left and upwards, we take
+    // the bottom-right corner of the time substracted by the top-left corner for
+    // Masza.
+    //
+    // This vector represents a rectangle. From there, we take the opposite vector
+    // to Masza's force vector and find the intersection between the rectangle and
+    const vector = {
+      // Rightward force: Masza's right side, item's left side
+      // Leftward force: Masza's left side, item's right side
+      x: masza.force.x >= 0 ? item.box.left - masza.box.right : item.box.right - masza.box.left,
+      // Downward force: Masza's bottom side, item's top side
+      // Upward force: Masza's top side, item's bottom side
+      y: masza.force.y >= 0 ? item.box.top - masza.box.bottom : item.box.bottom - masza.box.top
+    };
+
+    // Take the opposite of Masza's force vector to find the previous position, and
+    // thus the intersection point between Masza and the item based on her force vector.
+    const force = {
+      x: -masza.force.x,
+      y: -masza.force.y
+    };
+
+    // If the ratio is higher horizontally, we use the horizontal ratio to calculate
+    // the minimal movement needed to bring Masza out of the item.
+    const move = {
+      x: Math.ceil(force.x/vector.x >= force.y/vector.y ? vector.x : force.x * (vector.y / force.y)),
+      y: Math.ceil(force.x/vector.x >= force.y/vector.y ? force.y * (vector.x / force.x) : vector.y)
+    }
+
+    // Move only according to the strongest destination. This allows to slide across an item
+    // while pressed against it (e.g. jumping while pressing right while right to the left of
+    // an item).
+    if(item.physics == "block" && force.x/vector.x >= force.y/vector.y) {
+      masza.pos.x += move.x;
+      masza.force.x = 0;
+
+    } else {
+      masza.pos.y += move.y;
+      // If the y force is positive, Masza is coming from above, therefore this counts as a
+      // ground collision and resets the jumping flag.
+      if (masza.force.y > 0) {
+        masza.jumping = false;
+      }
+      masza.force.y = 0;
+    }
+  }
 }
 
 function detectCollisionWithEnvironment(masza, game) {
@@ -230,23 +245,37 @@ function parseMasza(masza) {
       action: false
     },
 
+    // Check if Masza collides with an item
+    // Collision between Masza and an item only applies if the item has a 'block'
+    // physics or 'top' physics and Masza was previously above the item.
+    //
+    // In the case of 'block' physics, the item cannot be traversed by Masza.
+    // For 'top' physics, Masza can traverse the item except when landing on top
+    // of them.
+    // For 'top' items, we take the previous known position (roughly equal to the
+    // current position minus force) and check if the y coordinate is above the top
+    // of the item. We also check if the 'down' key is not pressed, as it allows to
+    // pass through 'top' objects.
+    collides(item) {
+      return (
+        (
+          item.physics == "block" ||
+          (item.physics == "top" && this.pos.y - this.force.y <= item.box.top && !this.keys.down)
+        ) &&
+        this.box.left < item.box.right &&
+        this.box.right > item.box.left &&
+        this.box.top < item.box.bottom &&
+        this.box.bottom > item.box.top
+      );
+    },
+
     // Return a bounding box
     get box() {
       return {
         left: this.pos.x - this.width/2,
         right: this.pos.x + this.width/2,
         top: this.pos.y - this.height,
-        bottom: this.pos.y,
-
-        // Check if the bounding box collides with another one
-        collides(other) {
-          return (
-            this.left < other.right &&
-            this.right > other.left &&
-            this.top < other.bottom &&
-            this.bottom > other.top
-          );
-        }
+        bottom: this.pos.y
       }
     },
 

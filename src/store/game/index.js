@@ -119,7 +119,7 @@ function parseWorld(world) {
       })
 
       // Create a set to only return unique items.
-      return new Set(items);
+      return Array.from(new Set(items));
     }
   }
 }

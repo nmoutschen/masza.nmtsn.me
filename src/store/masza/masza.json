@@ -31,6 +31,8 @@
   },
   "force": {
     "maxY": 12,
-    "maxX": 10
+    "maxX": 10,
+    "jump": 12,
+    "jumpGrace": 6
   }
 }

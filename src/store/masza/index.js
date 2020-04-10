@@ -1,67 +1,85 @@
 import masza from "./masza.json";
 
-function detectCollisionWithItems(state, items) {
-  const box = {
-    fromX: state.pos.x - state.width/2,
-    toX: state.pos.x + state.width/2,
-    fromY: state.pos.y - state.height,
-    toY: state.pos.y
-  }
+function detectCollisionWithItems(masza, items) {
   items.forEach(item => {
-    const collisionBox = item.collisionBox;
-    if(
-      item.physics &&
-      box.fromX < collisionBox.toX &&
-      box.toX > collisionBox.fromX &&
-      box.fromY < collisionBox.toY &&
-      box.toY > collisionBox.fromY
-    ) {
-      var vector = {
-        x: state.pos.x - item.pos.x,
-        y: state.pos.y - item.pos.y
+    if(item.physics == "block" && masza.box.collides(item.box)) {
+      if(masza.force.x == 0 && masza.force.y == 0) {
+        masza.force.y = 1000;
       }
-      if(Math.abs(vector.x)/item.width > Math.abs(vector.y)/item.height) {
-        if(vector.x > 0) {
-          state.pos.x += (state.width+item.width)/2 - vector.x;
-        } else {
-          state.pos.x += - (state.width+item.width)/2 - vector.x;
-        }
-        state.force.x = 0;
+      // Calculate the vector representing the different between Masza's forward
+      // pointing corner and the item's backward pointing corner. These corners are
+      // based on Masza's force.
+      //
+      // For example, if Masza's force vector is pointing left and upwards, we take
+      // the bottom-right corner of the time substracted by the top-left corner for
+      // Masza.
+      //
+      // This vector represents a rectangle. From there, we take the opposite vector
+      // to Masza's force vector and find the intersection between the rectangle and
+      const vector = {
+        // Rightward force: Masza's right side, item's left side
+        // Leftward force: Masza's left side, item's right side
+        x: masza.force.x >= 0 ? item.box.left - masza.box.right : item.box.right - masza.box.left,
+        // Downward force: Masza's bottom side, item's top side
+        // Upward force: Masza's top side, item's bottom side
+        y: masza.force.y >= 0 ? item.box.top - masza.box.bottom : item.box.bottom - masza.box.top
+      };
+
+      // Take the opposite of Masza's force vector to find the previous position, and
+      // thus the intersection point between Masza and the item based on her force vector.
+      const force = {
+        x: -masza.force.x,
+        y: -masza.force.y
+      };
+
+      // If the ratio is higher horizontally, we use the horizontal ratio to calculate
+      // the minimal movement needed to bring Masza out of the item.
+      const move = {
+        x: Math.ceil(force.x/vector.x >= force.y/vector.y ? vector.x : force.x * (vector.y / force.y)),
+        y: Math.ceil(force.x/vector.x >= force.y/vector.y ? force.y * (vector.x / force.x) : vector.y)
+      }
+
+      // Move only according to the strongest destination. This allows to slide across an item
+      // while pressed against it (e.g. jumping while pressing right while right to the left of
+      // an item).
+      if(force.x/vector.x >= force.y/vector.y) {
+        masza.pos.x += move.x;
+        masza.force.x = 0;
       } else {
-        if(vector.y > 0) {
-          state.pos.y += (state.height+item.height)/2 - vector.y;
-        } else {
-          state.pos.y += - (state.height+item.height)/2 - vector.y;
-        state.jumping = false;
+        masza.pos.y += move.y;
+        // If the y force is positive, Masza is coming from above, therefore this counts as a
+        // ground collision and resets the jumping flag.
+        if (masza.force.y > 0) {
+          masza.jumping = false;
         }
-        state.force.y = 0;
+        masza.force.y = 0;
       }
     }
   });
 }
 
-function detectCollisionWithEnvironment(state, game) {
-  if(state.pos.x > game.width-state.width/2) {
-    state.pos.x = game.width-state.width/2;
-    state.force.x = 0;
-  } else if(state.pos.x < state.width/2) {
-    state.pos.x = state.width/2;
-    state.force.x = 0;
+function detectCollisionWithEnvironment(masza, game) {
+  if(masza.box.right > game.width) {
+    masza.pos.x = game.width-masza.width/2;
+    masza.force.x = 0;
+  } else if(masza.box.left < 0) {
+    masza.pos.x = masza.width/2;
+    masza.force.x = 0;
   }
-  if(state.pos.y >= game.height) {
-    state.pos.y = game.height;
-    state.force.y = 0;
-    state.jumping = false;
-  } else if(state.pos.y < state.height) {
-    state.pos.y = state.height;
-    state.force.y = 0;
+  if(masza.box.bottom > game.height) {
+    masza.pos.y = game.height;
+    masza.force.y = 0;
+    masza.jumping = false;
+  } else if(masza.box.top < 0) {
+    masza.pos.y = masza.height;
+    masza.force.y = 0;
   }
 }
 
-function move(state) {
+function move(masza) {
   // Apply forces
-  state.pos.x += state.force.x;
-  state.pos.y += state.force.y;
+  masza.pos.x += masza.force.x;
+  masza.pos.y += masza.force.y;
 }
 
 function setAnimation(state) {
@@ -87,7 +105,7 @@ function setAnimation(state) {
 }
 
 function updateForces(state) {
-  // Apply horizontal forces
+  // Update horizontal forces
   if(state.keys.left && !state.keys.right) {
     state.force.x = Math.max(state.force.x-2, -state.force.maxX);
   } else if (!state.keys.left && state.keys.right) {
@@ -104,12 +122,15 @@ function updateForces(state) {
     }
   }
 
-  // Apply vertical forces
+  // Update vertical forces
   if(state.keys.jump && !state.jumping) {
-    state.force.y = -state.force.maxY;
+    state.force.y = -state.force.jump;
     state.jumping = true;
   } else {
     state.force.y = Math.min(state.force.y+1, state.force.maxY);
+  }
+  if(!state.jumping && state.force.y >= state.force.jumpGrace) {
+    state.jumping = true;
   }
   if(state.jumping && state.keys.down) {
     state.force.y = Math.min(state.force.y+1, state.force.maxY);
@@ -135,7 +156,9 @@ function parseMasza(masza) {
       x: 0,
       y: 0,
       maxX: masza.force.maxX || 8,
-      maxY: masza.force.maxY || 12
+      maxY: masza.force.maxY || 12,
+      jump: masza.force.jump || 12,
+      jumpGrace: masza.force.jumpGrace || 6
     },
     keys: {
       left: false,
@@ -146,6 +169,22 @@ function parseMasza(masza) {
     },
     actions: masza.actions,
     variants: masza.variants,
+    get box() {
+      return {
+        left: this.pos.x - this.width/2,
+        right: this.pos.x + this.width/2,
+        top: this.pos.y - this.height,
+        bottom: this.pos.y,
+        collides(other) {
+          return (
+            this.left < other.right &&
+            this.right > other.left &&
+            this.top < other.bottom &&
+            this.bottom > other.top
+          );
+        }
+      }
+    },
     get style() {
       var maszaStyle = `
         position: absolute;
@@ -197,13 +236,13 @@ function actionStyle(action) {
 export default {
   state: parseMasza(masza),
   getters: {
-    maszaCollisionBox(state) {
+    maszabox(state) {
       // Returns the (x, y) coordinates that form the collision box.
       return {
-        fromX: state.pos.x - state.width/2,
-        toX: state.pos.x + state.width/2,
-        fromY: state.pos.y - state.height,
-        toY: state.pos.y
+        left: state.pos.x - state.width/2,
+        right: state.pos.x + state.width/2,
+        top: state.pos.y - state.height,
+        bottom: state.pos.y
       }
     },
     maszaStyle(state) {
@@ -307,12 +346,12 @@ export default {
       state.pos.y = rootState.game.height;
     },
     collides({ getters }, other) {
-      const box = getters.collisionBox;
+      const box = getters.box;
       return (
-        box.fromX < other.toX &&
-        box.toX > other.fromX &&
-        box.fromY < other.toY &&
-        box.toY > other.fromY
+        box.left < other.right &&
+        box.right > other.left &&
+        box.top < other.bottom &&
+        box.bottom > other.top
       )
     }
   }

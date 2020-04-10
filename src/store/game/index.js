@@ -9,7 +9,7 @@ class Item {
     this.spriteSize = sprite;
     this.spriteImg = spriteImg;
   
-    this.physics = itemType.physics === undefined ? true : itemType.physics;
+    this.physics = itemType.physics === undefined ? "block" : itemType.physics;
     this.pos = {
       x: item.x,
       y: item.y
@@ -21,12 +21,12 @@ class Item {
     this.width = itemType.width;
   }
 
-  get collisionBox() {
+  get box() {
     return {
-      fromX: this.pos.x - this.width/2,
-      toX: this.pos.x + this.width/2,
-      fromY: this.pos.y - this.height,
-      toY: this.pos.y
+      left: this.pos.x - this.width/2,
+      right: this.pos.x + this.width/2,
+      top: this.pos.y - this.height,
+      bottom: this.pos.y
     }
   }
 

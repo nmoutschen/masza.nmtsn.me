@@ -29,10 +29,16 @@
       "y": 32
     }
   },
-  "force": {
+  "config": {
+    "accel": 2,
+    "decel": 1,
+    "forcedDecel": 2,
+    "forcedMaxY": 24,
+    "forcedVertAccel": 2,
+    "jump": 12,
+    "jumpGrace": 6,
     "maxY": 12,
     "maxX": 10,
-    "jump": 12,
-    "jumpGrace": 6
+    "vertAccel": 1
   }
 }

@@ -19,10 +19,8 @@ class Item {
     this.height = itemType.height;
     this.sprite = itemType.sprite;
     this.width = itemType.width;
-  }
 
-  get box() {
-    return {
+    this.box = {
       left: this.pos.x - this.width/2,
       right: this.pos.x + this.width/2,
       top: this.pos.y - this.height,
@@ -48,6 +46,7 @@ function parseWorld(world) {
   const spriteImg = require(`./${world.sprite.img}`);
 
   var game = {
+    start: world.start || {x: 0, y: 0},
     height: world.height || 512,
     width: world.width || 512,
     items: world.items.map((item) => {

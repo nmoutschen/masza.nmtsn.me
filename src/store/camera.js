@@ -50,7 +50,9 @@ export default {
     }
   },
   mutations: {
-    nextTick(state, rootState) {
+    // The camera needs to update on physics ticks to make sure that it's following
+    // Masza properly. Otherwise, this could cause an unpleasant jitter.
+    nextPhysicsTick(state, rootState) {
       // Update camera position
       updatePosition(state, rootState.game, rootState.masza);
     }

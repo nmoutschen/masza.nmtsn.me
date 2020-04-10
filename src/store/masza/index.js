@@ -2,10 +2,22 @@ import masza from "./masza.json";
 
 function detectCollisionWithItems(masza, items) {
   items.forEach(item => {
-    if(item.physics == "block" && masza.box.collides(item.box)) {
-      if(masza.force.x == 0 && masza.force.y == 0) {
-        masza.force.y = 1000;
-      }
+    // Collision between Masza and an item only applies if the item has a 'block'
+    // physics or 'top' physics and Masza was previously above the item.
+    //
+    // In the case of 'block' physics, the item cannot be traversed by Masza.
+    // For 'top' physics, Masza can traverse the item except when landing on top
+    // of them.
+    // For 'top' items, we take the previous known position (roughly equal to the
+    // current position minus force) and check if the y coordinate is above the top
+    // of the item.
+    if(
+      (
+        item.physics == "block" ||
+        (item.physics == "top" && masza.pos.y - masza.force.y <= item.box.top)
+      ) &&
+      masza.box.collides(item.box)
+    ) {
       // Calculate the vector representing the different between Masza's forward
       // pointing corner and the item's backward pointing corner. These corners are
       // based on Masza's force.
@@ -42,9 +54,10 @@ function detectCollisionWithItems(masza, items) {
       // Move only according to the strongest destination. This allows to slide across an item
       // while pressed against it (e.g. jumping while pressing right while right to the left of
       // an item).
-      if(force.x/vector.x >= force.y/vector.y) {
+      if(item.physics == "block" && force.x/vector.x >= force.y/vector.y) {
         masza.pos.x += move.x;
         masza.force.x = 0;
+      
       } else {
         masza.pos.y += move.y;
         // If the y force is positive, Masza is coming from above, therefore this counts as a
@@ -59,6 +72,10 @@ function detectCollisionWithItems(masza, items) {
 }
 
 function detectCollisionWithEnvironment(masza, game) {
+  // The game world is a box and this checks if Masza is not outside one of
+  // those boxes. If so, this pushes her back into the game world.
+
+  // Horizontal detection
   if(masza.box.right > game.width) {
     masza.pos.x = game.width-masza.width/2;
     masza.force.x = 0;
@@ -66,6 +83,8 @@ function detectCollisionWithEnvironment(masza, game) {
     masza.pos.x = masza.width/2;
     masza.force.x = 0;
   }
+
+  // Vertical detection
   if(masza.box.bottom > game.height) {
     masza.pos.y = game.height;
     masza.force.y = 0;
@@ -106,34 +125,41 @@ function setAnimation(state) {
 
 function updateForces(state) {
   // Update horizontal forces
+  // Left movement
   if(state.keys.left && !state.keys.right) {
-    state.force.x = Math.max(state.force.x-2, -state.force.maxX);
+    state.force.x = Math.max(state.force.x-state.config.accel, -state.config.maxX);
+
+  // Right movement
   } else if (!state.keys.left && state.keys.right) {
-    state.force.x = Math.min(state.force.x+2, state.force.maxX);
-  } else if(state.force.x > 0 && !state.jumping) {
-    state.force.x = Math.max(state.force.x-1, 0);
-    if(state.keys.down && state.force.x > 0) {
-      state.force.x = Math.max(state.force.x-1, 0);
-    }
-  } else if(state.force.x < 0 && !state.jumping) {
-    state.force.x = Math.min(state.force.x+1, 0);
-    if(state.keys.down && state.force.x < 0) {
-      state.force.x = Math.min(state.force.x+1, 0);
+    state.force.x = Math.min(state.force.x+state.config.accel, state.config.maxX);
+
+  // Not jumping and not moving
+  } else if(!state.jumping) {
+    // When lying down, Masza decelerates differently
+    if(state.keys.down) {
+      state.force.x = state.force.x > 0 ? Math.max(state.force.x-state.config.forcedDecel, 0) : Math.min(state.force.x+state.config.forcedDecel, 0);
+    } else {
+      state.force.x = state.force.x > 0 ? Math.max(state.force.x-state.config.decel, 0) : Math.min(state.force.x+state.config.decel, 0);
     }
   }
 
   // Update vertical forces
+  // Jump key pressed but not jumping
   if(state.keys.jump && !state.jumping) {
-    state.force.y = -state.force.jump;
+    state.force.y = -state.config.jump;
     state.jumping = true;
+
+  // Jumping and pressing down
+  } else if(state.jumping && state.keys.down) {
+    state.force.y = Math.min(state.force.y + state.config.forcedVertAccel, state.config.forcedMaxY);
   } else {
-    state.force.y = Math.min(state.force.y+1, state.force.maxY);
+    state.force.y = Math.min(state.force.y + state.config.vertAccel, state.config.maxY);
   }
-  if(!state.jumping && state.force.y >= state.force.jumpGrace) {
+
+  // When in the air but not jumping, we grant a grace period before which Masza is
+  // in the 'jumping' state.
+  if(!state.jumping && state.force.y >= state.config.jumpGrace) {
     state.jumping = true;
-  }
-  if(state.jumping && state.keys.down) {
-    state.force.y = Math.min(state.force.y+1, state.force.maxY);
   }
 }
 
@@ -143,22 +169,31 @@ function parseMasza(masza) {
     height: masza.height,
     sprite: masza.sprite,
     spriteImg: require(`./${masza.sprite.img}`),
-    frameCounter: 0,
+    // Control Masza's animation mode
     animation: {
       type: masza.defaultAction,
       flipped: false,
       altFrame: false
     },
+    // Position is loaded based on the game world during the setup action
     pos: {
       x: 0, y: 0
     },
+    // Force is always initialized as (0, 0)
     force: {
-      x: 0,
-      y: 0,
-      maxX: masza.force.maxX || 8,
-      maxY: masza.force.maxY || 12,
-      jump: masza.force.jump || 12,
-      jumpGrace: masza.force.jumpGrace || 6
+      x: 0, y: 0
+    },
+    config: {
+      accel: masza.config.accel || 1,
+      decel: masza.config.decel || 1,
+      forcedDecel: masza.config.forcedDecel || 2,
+      forcedMaxY: masza.config.forcedMaxY || 24,
+      forcedVertAccel: masza.config.forcedVertAccel || 2,
+      jump: masza.config.jump || 12,
+      jumpGrace: masza.config.jumpGrace || 6,
+      maxX: masza.config.maxX || 8,
+      maxY: masza.config.maxY || 12,
+      vertAccel: masza.config.vertAccel || 1
     },
     keys: {
       left: false,
@@ -319,16 +354,7 @@ export default {
           break;
       }
     },
-    nextTick(state, rootState) {
-      // Move 1 frame
-      state.frameCounter = (state.frameCounter + 1) % 20;
-
-      // Change animation to alternative frame
-      state.animation.altFrame = (state.frameCounter % 10) > 5;
-
-      // Set the right animation
-      setAnimation(state);
-
+    nextPhysicsTick(state, rootState) {
       // Move
       move(state);
 
@@ -338,12 +364,19 @@ export default {
 
       // Update forces
       updateForces(state);
-    }
+    },
+    nextGraphicsTick(state) {
+      // Change animation to alternative frame
+      state.animation.altFrame = !state.animation.altFrame;
+
+      // Set the right animation
+      setAnimation(state);
+    },
   },
   actions: {
     setup({ state, rootState }) {
-      state.pos.x = 32;
-      state.pos.y = rootState.game.height;
+      state.pos.x = rootState.game.start.x || state.width/2;
+      state.pos.y = rootState.game.start.y || state.height;
     },
     collides({ getters }, other) {
       const box = getters.box;

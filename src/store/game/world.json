@@ -1,6 +1,10 @@
 {
   "width": 1024,
   "height": 512,
+  "start": {
+    "x": 32,
+    "y": 480
+  },
   "sprite": {
     "img": "items.png",
     "x": 256,
@@ -46,7 +50,8 @@
       "sprite": {
         "x": 64,
         "y": 64
-      }
+      },
+      "physics": "top"
     },
     "deskTop": {
       "width": 64,
@@ -101,6 +106,10 @@
     {"type": "dogBed", "x": 112, "y": 512},
     {"type": "tv", "x": 160, "y": 512},
     {"type": "desk", "x": 288, "y": 512},
+    {"type": "desk", "x": 288, "y": 480},
+    {"type": "desk", "x": 288, "y": 416},
+    {"type": "desk", "x": 288, "y": 352},
+    {"type": "desk", "x": 288, "y": 288},
     {"type": "deskTop", "x": 288, "y": 480},
     {"type": "human1", "x": 592, "y": 512},
     {"type": "human2", "x": 624, "y": 512}

@@ -19,8 +19,11 @@ export default new Vuex.Store({
     keyDown({ commit }, key) {
       commit("keyDown", key);
     },
-    nextTick({ commit, rootState }) {
-      commit("nextTick", rootState);
+    nextGraphicsTick({ commit, rootState }) {
+      commit("nextGraphicsTick", rootState);
+    },
+    nextPhysicsTick({ commit, rootState }) {
+      commit("nextPhysicsTick", rootState);
     },
   },
   modules: {

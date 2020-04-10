@@ -12,8 +12,11 @@
 </template>
 
 <script>
-function tick(component) {
-  component.$store.dispatch("nextTick");
+function nextGraphicsTick(component) {
+  component.$store.dispatch("nextGraphicsTick");
+}
+function nextPhysicsTick(component) {
+  component.$store.dispatch("nextPhysicsTick");
 }
 
 export default {
@@ -45,7 +48,8 @@ export default {
   },
   data: () => {
     return {
-      mainLoop: null
+      mainGraphicsLoop: null,
+      mainPhysicsLoop: null
     };
   },
   methods: {
@@ -60,14 +64,18 @@ export default {
     this.$store.dispatch("setup");
     window.addEventListener('keydown', this.keyDown, false);
     window.addEventListener('keyup', this.keyUp, false);
-    this.mainLoop = setInterval(() => {
-      tick(this);
+    this.mainGraphicsLoop = setInterval(() => {
+      nextGraphicsTick(this);
+    }, 125);
+    this.mainPhysicsLoop = setInterval(() => {
+      nextPhysicsTick(this);
     }, 25);
   },
   destroyed() {
     window.removeEventListener('keydown', this.keyDown);
     window.removeEventListener('keyup', this.keyUp);
-    clearInterval(this.mainLoop);
+    clearInterval(this.mainGraphicsLoop);
+    clearInterval(this.mainPhysicsLoop);
   },
 }
 </script>

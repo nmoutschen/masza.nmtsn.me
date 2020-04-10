@@ -1,5 +1,13 @@
 import masza from "./masza.json";
 
+const KEYMAP = {
+  32: "jump",
+  37: "left",
+  39: "right",
+  40: "down",
+  69: "action"
+}
+
 function detectCollisionWithItems(masza, items) {
   items.forEach(item => {
     // Collision between Masza and an item only applies if the item has a 'block'
@@ -120,7 +128,9 @@ function setAnimation(state) {
     state.animation.type = "sitting";
   }
 
-  // Flip the image if going left
+  // Flip the image based on left/right keys
+  // This means that Masza could go left (positive force.x value) but would look
+  // right as the right key is pressed.
   if(state.keys.left && !state.keys.right) {
     state.animation.flipped = true;
   } else if(!state.keys.left && state.keys.right) {
@@ -178,16 +188,26 @@ function parseMasza(masza) {
     animation: {
       type: masza.defaultAction,
       flipped: false,
-      altFrame: false
+      altFrame: false,
+      // List of actions, used for animations
+    actions: masza.actions,
+    // List of action variants, used for animations
+    variants: masza.variants,
     },
+
     // Position is loaded based on the game world during the setup action
     pos: {
       x: 0, y: 0
     },
+
     // Force is always initialized as (0, 0)
     force: {
       x: 0, y: 0
     },
+
+    // Configuration parameters
+    // These parameters configure aspects such as Masza's acceleration speed,
+    // max speed, etc.
     config: {
       accel: masza.config.accel || 1,
       decel: masza.config.decel || 1,
@@ -200,6 +220,8 @@ function parseMasza(masza) {
       maxY: masza.config.maxY || 12,
       vertAccel: masza.config.vertAccel || 1
     },
+    // Keys
+    // These are set to true if currently pressed
     keys: {
       left: false,
       right: false,
@@ -207,14 +229,16 @@ function parseMasza(masza) {
       jump: false,
       action: false
     },
-    actions: masza.actions,
-    variants: masza.variants,
+
+    // Return a bounding box
     get box() {
       return {
         left: this.pos.x - this.width/2,
         right: this.pos.x + this.width/2,
         top: this.pos.y - this.height,
         bottom: this.pos.y,
+
+        // Check if the bounding box collides with another one
         collides(other) {
           return (
             this.left < other.right &&
@@ -225,6 +249,8 @@ function parseMasza(masza) {
         }
       }
     },
+
+    // Generate the CSS style
     get style() {
       var maszaStyle = `
         position: absolute;
@@ -239,18 +265,18 @@ function parseMasza(masza) {
       // Parse the variant (e.g. alternative frame)
       if(
         this.animation.altFrame &&
-        this.variants !== undefined &&
-        this.variants.altFrame !== undefined
+        this.animation.variants !== undefined &&
+        this.animation.variants.altFrame !== undefined
       ) {
-        maszaStyle += actionStyle(this.variants.altFrame);
+        maszaStyle += actionStyle(this.animation.variants.altFrame);
       }
 
       // Parse the action
       if(
-        masza.actions !== undefined &&
-        masza.actions[this.animation.type] !== undefined
+        this.animation.actions !== undefined &&
+        this.animation.actions[this.animation.type] !== undefined
       ) {
-        maszaStyle += actionStyle(this.actions[this.animation.type]);
+        maszaStyle += actionStyle(this.animation.actions[this.animation.type]);
       }
 
       // Flip the image if necessary
@@ -262,6 +288,9 @@ function parseMasza(masza) {
   }
 }
 
+// Set the CSS style based on Masza's JSON config file
+// As Masza is made of a single PNG sprite, this displaces the background
+// position to match the coordinates of the action.
 function actionStyle(action) {
   var style = "";
   if(action.x !== undefined) {
@@ -275,88 +304,17 @@ function actionStyle(action) {
 
 export default {
   state: parseMasza(masza),
-  getters: {
-    maszabox(state) {
-      // Returns the (x, y) coordinates that form the collision box.
-      return {
-        left: state.pos.x - state.width/2,
-        right: state.pos.x + state.width/2,
-        top: state.pos.y - state.height,
-        bottom: state.pos.y
-      }
-    },
-    maszaStyle(state) {
-      var maszaStyle = `
-        position: absolute;
-        z-index: 1;
-        background-image: url("${state.spriteImg}");
-        background-size: ${state.sprite.x}px ${state.sprite.y}px;
-        height: ${state.height}px;
-        width: ${state.width}px;
-        top: ${state.pos.y - state.height}px;
-        left: ${state.pos.x - state.width/2}px;
-      `;
-      // Parse the variant (e.g. alternative frame)
-      if(
-        state.animation.altFrame &&
-        state.variants !== undefined &&
-        state.variants.altFrame !== undefined
-      ) {
-        maszaStyle += actionStyle(state.variants.altFrame);
-      }
-
-      // Parse the action
-      if(
-        masza.actions !== undefined &&
-        masza.actions[state.animation.type] !== undefined
-      ) {
-        maszaStyle += actionStyle(state.actions[state.animation.type]);
-      }
-
-      // Flip the image if necessary
-      if(state.animation.flipped) {
-        maszaStyle += "-moz-transform: scaleX(-1);-o-transform: scaleX(-1);-webkit-transform: scaleX(-1);transform: scaleX(-1);";
-      }
-      return maszaStyle;
-    }
-  },
   mutations: {
+    // Key has been pressed
     keyDown(state, key) {
-      switch(key) {
-        case 32: // Space
-          state.keys.jump = true;
-          break;
-        case 37: // Left
-          state.keys.left = true;
-          break;
-        case 39: // Right
-          state.keys.right = true;
-          break;
-        case 40: // Down
-          state.keys.down = true;
-          break;
-        case 69: // e
-          state.keys.action = true;
-          break;
+      if(KEYMAP[key] !== undefined) {
+        state.keys[KEYMAP[key]] = true;
       }
     },
+    // Key is no longer pressed
     keyUp(state, key) {
-      switch(key) {
-        case 32: // Space
-          state.keys.jump = false;
-          break;
-        case 37: // Left
-          state.keys.left = false;
-          break;
-        case 39: // Right
-          state.keys.right = false;
-          break;
-        case 40: // Down
-          state.keys.down = false;
-          break;
-        case 69: // e
-          state.keys.action = false;
-          break;
+      if(KEYMAP[key] !== undefined) {
+        state.keys[KEYMAP[key]] = false;
       }
     },
     nextPhysicsTick(state, rootState) {
@@ -379,18 +337,10 @@ export default {
     },
   },
   actions: {
+    // Set the initial position based on the game configuration.
     setup({ state, rootState }) {
       state.pos.x = rootState.game.start.x || state.width/2;
       state.pos.y = rootState.game.start.y || state.height;
-    },
-    collides({ getters }, other) {
-      const box = getters.box;
-      return (
-        box.left < other.right &&
-        box.right > other.left &&
-        box.top < other.bottom &&
-        box.bottom > other.top
-      )
     }
   }
 }

@@ -3,6 +3,7 @@ import world from './world.json';
 const CHUNK_SIZE = {"width": 128, "height": 128};
 
 function itemsByChunk(items, world) {
+  // Create the chunk arrays
   var chunks = {};
   for(var x = 0; x < Math.ceil(world.width/CHUNK_SIZE.width); x++) {
     chunks[x] = {};
@@ -11,13 +12,26 @@ function itemsByChunk(items, world) {
     }
   }
 
+  // Group items by chunks in which they appear. An item is considered as appearing
+  // in a chunk if its bounding box (item.box) overlaps with the chunk. As an item
+  // could be larger than a single chunk, it means that an item could be present in
+  // any number of chunks. Therefore, this looks that the leftmost chunk in which it
+  // is present, then loops till the rightmost chunk, and similarly from top to bottom.
+  //
+  // E.g. if an item starts in chunk {x: 0, y: 0} and ends in {x: 2, y: 2}, it will
+  // appear in nine different chunks.
   items.forEach((item) => {
-    (new Set([
-      {x: Math.floor(item.box.left/CHUNK_SIZE.width), y: Math.floor(item.box.top/CHUNK_SIZE.height)},
-      {x: Math.floor(item.box.right/CHUNK_SIZE.width), y: Math.floor(item.box.top/CHUNK_SIZE.height)},
-      {x: Math.floor(item.box.left/CHUNK_SIZE.width), y: Math.floor(item.box.bottom/CHUNK_SIZE.height)},
-      {x: Math.floor(item.box.right/CHUNK_SIZE.width), y: Math.floor(item.box.bottom/CHUNK_SIZE.height)}
-    ])).forEach(({x, y}) => {
+    const {left, right, top, bottom} = item.box;
+    var itemChunks = new Set();
+    for(var x = Math.floor(left/CHUNK_SIZE.width); x < Math.ceil(right/CHUNK_SIZE.width); x++) {
+      for(var y = Math.floor(top/CHUNK_SIZE.height); y < Math.ceil(bottom/CHUNK_SIZE.height); y++) {
+        itemChunks.add({x, y});
+      }
+    }
+    itemChunks.forEach(({x, y}) => {
+      // It's possible that an item would extend beyond known chunks. If this is the
+      // case, as it will neither be rendered or used for collision, we can safely
+      // ignore that.
       if(chunks[x] !== undefined && chunks[x][y] !== undefined) {
         chunks[x][y].push(item);
       }
@@ -37,7 +51,7 @@ class Item {
     this.spriteSize = sprite;
     this.spriteImg = spriteImg;
   
-    this.physics = itemType.physics === undefined ? "block" : itemType.physics;
+    this.physics = itemType.physics || "block";
     this.pos = {
       x: item.x,
       y: item.y
@@ -88,6 +102,7 @@ function parseWorld(world) {
     items: items,
     chunks: itemsByChunk(items, world),
     itemsWithin({left, top, right, bottom}) {
+      // Filter chunks that correspond to the bounding box.
       var chunks = new Set();
       for(var x = Math.floor(left/CHUNK_SIZE.width); x < Math.ceil(right/CHUNK_SIZE.width); x++) {
         for(var y = Math.floor(top/CHUNK_SIZE.height); y < Math.ceil(bottom/CHUNK_SIZE.height); y++) {
@@ -95,6 +110,7 @@ function parseWorld(world) {
         }
       }
 
+      // Gather items that are in the selected chunks.
       var items = [];
       chunks.forEach(({x, y}) => {
         if(this.chunks[x] !== undefined && this.chunks[x][y] !== undefined) {
@@ -102,6 +118,7 @@ function parseWorld(world) {
         }
       })
 
+      // Create a set to only return unique items.
       return new Set(items);
     }
   }

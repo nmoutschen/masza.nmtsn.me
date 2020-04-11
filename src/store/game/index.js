@@ -49,7 +49,10 @@ class Item {
   constructor(sprite, spriteImg, item, itemType) {
     this.id = itemCounter++;
   
-    this.spriteSize = sprite;
+    this.spriteSize = {
+      x: sprite.x * ITEM_SIZE,
+      y: sprite.y * ITEM_SIZE
+    };
     this.spriteImg = spriteImg;
   
     this.physics = itemType.physics || "block";
@@ -59,9 +62,9 @@ class Item {
     };
     this.type = item.type;
 
-    this.height = itemType.height || 32;
-    this.width = itemType.width || 32;
-    this.sprite = {x: itemType.x, y: itemType.y};
+    this.height = itemType.height * ITEM_SIZE || 32;
+    this.width = itemType.width * ITEM_SIZE || 32;
+    this.sprite = {x: itemType.x * ITEM_SIZE, y: itemType.y * ITEM_SIZE};
 
     this.box = {
       left: this.pos.x - this.width/2,
@@ -97,9 +100,12 @@ function parseWorld(world) {
   });
 
   return {
-    start: world.start || {x: 0, y: 0},
-    height: world.height * ITEM_SIZE || 512,
-    width: world.width * ITEM_SIZE || 512,
+    start: {
+      x: world.start.x * ITEM_SIZE + ITEM_SIZE/2 || 0,
+      y: world.start.y * ITEM_SIZE + ITEM_SIZE || 0
+    },
+    height: world.height * ITEM_SIZE || 16,
+    width: world.width * ITEM_SIZE || 16,
     items: items,
     chunks: itemsByChunk(items, world),
     itemsWithin({left, top, right, bottom}) {

@@ -5,9 +5,10 @@
       <div v-for="item in items" :key="item.id" :style="item.style" />
     </div>
     <p id="debug" v-if="devMode">
-        pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
-        force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})
-      </p>
+      pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
+      force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})<br/>
+      items: {{ items.length }}
+    </p>
   </div>
 </template>
 
@@ -79,13 +80,19 @@ export default {
 #game {
   position: relative;
   margin: 0px auto;
-  border-bottom: 2px solid #fff;
   overflow: hidden;
 
   &.devMode {
     border-left: 2px solid #f00;
     border-right: 2px solid #f00;
+    border-bottom: 2px solid #f00;
     overflow: visible;
+  }
+
+  #debug {
+    position: absolute;
+    color: #f00;
+    z-index: 100;
   }
 
   #gameView {

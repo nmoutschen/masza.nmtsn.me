@@ -28,16 +28,13 @@ export default {
 }
 
 body {
-  background-color: #000;
+  background-color: #684E32;
   font-family: '7x5', monospace;
-  color: #fff;
+  color: #F9EA9A;
   font-size: 16px;
 }
 
 a {
-  color: #fff;
-}
-
-#app {
+  color: #F9EA9A;
 }
 </style>

@@ -80,9 +80,14 @@
     "fComputer": {"width": "2", "x": 2, "y": 9, "physics": "none"},
 
     "fTvStand": {"width": "2", "x": 0, "y": 10},
-    "fDesk": {"width": "2", "x": 2, "y": 10, "physics": "top"}
+    "fDesk": {"width": "2", "x": 2, "y": 10, "physics": "top"},
+
+    "tTitle": {"width": 8, "x": 0, "y": 12, "physics": "none"},
+    "tKeys": {"width": 6, "x": 8, "y": 12, "physics": "none"}
   },
   "items": [
+    {"type": "tTitle", "x": 4, "y": 3}, {"type": "tKeys", "x": 5, "y": 4},
+
     {"type": "brickL", "x": 0, "y": 15}, {"type": "brickL", "x": 0, "y": 14}, {"type": "brickE", "x": 0, "y": 13}, {"type": "brickE", "x": 0, "y": 12}, {"type": "brickE", "x": 0, "y": 11}, {"type": "brickE", "x": 0, "y": 10}, {"type": "brickE", "x": 0, "y": 9}, {"type": "brickE", "x": 0, "y": 8},
       {"type": "brickE", "x": 0, "y": 7}, {"type": "brickE", "x": 0, "y": 6}, {"type": "brickE", "x": 0, "y": 5}, {"type": "brickE", "x": 0, "y": 4}, {"type": "brickE", "x": 0, "y": 3}, {"type": "brickE", "x": 0, "y": 2}, {"type": "brickE", "x": 0, "y": 1}, {"type": "brickE", "x": 0, "y": 0},
     {"type": "brick", "x": 1, "y": 15}, {"type": "brick", "x": 1, "y": 14}, {"type": "woodTop", "x": 1, "y": 12}, {"type": "woodTop", "x": 1, "y": 10}, {"type": "woodTopL", "x": 1, "y": 8},

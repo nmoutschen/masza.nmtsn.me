@@ -55,16 +55,16 @@ class Item {
     };
     this.spriteImg = spriteImg;
   
-    this.physics = itemType.physics || "block";
-    this.pos = {
-      x: item.x * ITEM_SIZE + ITEM_SIZE/2,
-      y: item.y * ITEM_SIZE + ITEM_SIZE
-    };
-    this.type = item.type;
-
     this.height = itemType.height * ITEM_SIZE || 32;
     this.width = itemType.width * ITEM_SIZE || 32;
     this.sprite = {x: itemType.x * ITEM_SIZE, y: itemType.y * ITEM_SIZE};
+
+    this.physics = itemType.physics || "block";
+    this.pos = {
+      x: item.x * ITEM_SIZE + this.width/2,
+      y: item.y * ITEM_SIZE + this.height
+    };
+    this.type = item.type;
 
     this.box = {
       left: this.pos.x - this.width/2,

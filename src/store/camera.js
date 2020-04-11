@@ -43,7 +43,7 @@ function updatePosition(camera, game, masza) {
 export default {
   state: {
     width: 512,
-    height: 512,
+    height: 384,
     pos: {
       x: 0,
       y: 0,

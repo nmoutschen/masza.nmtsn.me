@@ -77,21 +77,23 @@ export default {
 </script>
 
 <style lang="scss">
+@import "../assets/colors.scss";
+
 #game {
   position: relative;
   margin: 0px auto;
   overflow: hidden;
 
   &.devMode {
-    border-left: 2px solid #f00;
-    border-right: 2px solid #f00;
-    border-bottom: 2px solid #f00;
+    border-left: 2px solid $red;
+    border-right: 2px solid $red;
+    border-bottom: 2px solid $red;
     overflow: visible;
   }
 
   #debug {
     position: absolute;
-    color: #f00;
+    color: $red;
     z-index: 100;
   }
 
@@ -100,6 +102,7 @@ export default {
   }
 
   * {
+    // Prevent smoothing edges in images.
     image-rendering: optimizeSpeed;
     image-rendering: -moz-crisp-edges;
     image-rendering: -o-crisp-edges;

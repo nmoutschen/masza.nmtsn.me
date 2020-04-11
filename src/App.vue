@@ -16,6 +16,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import "./assets/colors.scss";
+
 @font-face {
   font-family: "7x5";
   src: url("./assets/font_7x5.ttf") format("truetype");
@@ -28,13 +30,13 @@ export default {
 }
 
 body {
-  background-color: #684E32;
+  background-color: $background;
   font-family: '7x5', monospace;
-  color: #F9EA9A;
-  font-size: 16px;
+  color: $primary;
+  font-size: 8px;
 }
 
 a {
-  color: #F9EA9A;
+  color: $primary;
 }
 </style>

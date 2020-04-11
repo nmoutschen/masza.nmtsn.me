@@ -1,13 +1,14 @@
 import world from './world.json';
 
 const CHUNK_SIZE = {"width": 128, "height": 128};
+const ITEM_SIZE = 32;
 
 function itemsByChunk(items, world) {
   // Create the chunk arrays
   var chunks = {};
-  for(var x = 0; x < Math.ceil(world.width/CHUNK_SIZE.width); x++) {
+  for(var x = 0; x < Math.ceil(world.width*ITEM_SIZE/CHUNK_SIZE.width); x++) {
     chunks[x] = {};
-    for(var y = 0; y < Math.ceil(world.height/CHUNK_SIZE.height); y++) {
+    for(var y = 0; y < Math.ceil(world.height*ITEM_SIZE/CHUNK_SIZE.height); y++) {
       chunks[x][y] = new Array();
     }
   }
@@ -53,14 +54,14 @@ class Item {
   
     this.physics = itemType.physics || "block";
     this.pos = {
-      x: item.x,
-      y: item.y
+      x: item.x * ITEM_SIZE + ITEM_SIZE/2,
+      y: item.y * ITEM_SIZE + ITEM_SIZE
     };
     this.type = item.type;
 
-    this.height = itemType.height;
-    this.sprite = itemType.sprite;
-    this.width = itemType.width;
+    this.height = itemType.height || 32;
+    this.width = itemType.width || 32;
+    this.sprite = {x: itemType.x, y: itemType.y};
 
     this.box = {
       left: this.pos.x - this.width/2,
@@ -97,8 +98,8 @@ function parseWorld(world) {
 
   return {
     start: world.start || {x: 0, y: 0},
-    height: world.height || 512,
-    width: world.width || 512,
+    height: world.height * ITEM_SIZE || 512,
+    width: world.width * ITEM_SIZE || 512,
     items: items,
     chunks: itemsByChunk(items, world),
     itemsWithin({left, top, right, bottom}) {

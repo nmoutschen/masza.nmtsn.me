@@ -1,4 +1,5 @@
 import masza from "./masza.json";
+import world from "@/lib/world/index.js";
 
 const KEYMAP = {
   32: "jump",
@@ -346,13 +347,13 @@ export default {
         state.keys[KEYMAP[key]] = false;
       }
     },
-    nextPhysicsTick(state, rootState) {
+    nextPhysicsTick(state) {
       // Move
       move(state);
 
       // Collision
-      detectCollisionWithEnvironment(state, rootState.game);
-      detectCollisionWithTiles(state, rootState.game.tilesWithin(state.box));
+      detectCollisionWithEnvironment(state, world);
+      detectCollisionWithTiles(state, world.tilesWithin(state.box));
 
       // Update forces
       updateForces(state);
@@ -367,9 +368,9 @@ export default {
   },
   actions: {
     // Set the initial position based on the game configuration.
-    setup({ state, rootState }) {
-      state.pos.x = rootState.game.start.x || state.width/2;
-      state.pos.y = rootState.game.start.y || state.height;
+    setup({ state }) {
+      state.pos.x = world.start.x || state.width/2;
+      state.pos.y = world.start.y || state.height;
     }
   }
 }

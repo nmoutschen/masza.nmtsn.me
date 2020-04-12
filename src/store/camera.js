@@ -1,4 +1,6 @@
-function updatePosition(camera, game, masza) {
+import world from '@/lib/world/index.js';
+
+function updatePosition(camera, masza) {
   // Move camera left
   if(
     masza.pos.x - camera.pos.x < camera.width/4 &&
@@ -11,11 +13,11 @@ function updatePosition(camera, game, masza) {
   // Move camera right
   } else if(
     masza.pos.x > camera.pos.x + camera.width - camera.width/4 &&
-    camera.pos.x < game.width - camera.width
+    camera.pos.x < world.width - camera.width
   ) {
     camera.pos.x = Math.min(
       masza.pos.x - camera.width + camera.width/4,
-      game.width - camera.width
+      world.width - camera.width
     )
   }
 
@@ -31,11 +33,11 @@ function updatePosition(camera, game, masza) {
   // Move camera down
   } else if(
     masza.pos.y > camera.pos.y + camera.height - camera.height/4 &&
-    camera.pos.y < game.height - camera.height
+    camera.pos.y < world.height - camera.height
   ) {
     camera.pos.y = Math.min(
       masza.pos.y - camera.height + camera.height/4,
-      game.height - camera.height
+      world.height - camera.height
     )
   }
 }
@@ -68,9 +70,9 @@ export default {
   mutations: {
     // The camera needs to update on physics ticks to make sure that it's following
     // Masza properly. Otherwise, this could cause an unpleasant jitter.
-    nextPhysicsTick(state, rootState) {
+    nextPhysicsTick(state, { masza }) {
       // Update camera position
-      updatePosition(state, rootState.game, rootState.masza);
+      updatePosition(state, masza);
     }
   }
 }

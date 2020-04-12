@@ -4,7 +4,6 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import camera from './camera.js';
-import game from './game/index.js';
 import masza from './masza/index.js';
 
 export default new Vuex.Store({
@@ -28,7 +27,6 @@ export default new Vuex.Store({
   },
   modules: {
     camera,
-    game,
     masza
   }
 })

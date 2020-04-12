@@ -13,6 +13,8 @@
 </template>
 
 <script>
+import world from '@/lib/world/index.js';
+
 function nextGraphicsTick(component) {
   component.$store.dispatch("nextGraphicsTick");
 }
@@ -27,7 +29,7 @@ export default {
       return this.$store.state.masza;
     },
     tiles() {
-      return this.$store.state.game.tilesWithin(this.$store.state.camera.box);
+      return world.tilesWithin(this.$store.state.camera.box);
     },
     devMode() {
       return process.env.NODE_ENV == "development"

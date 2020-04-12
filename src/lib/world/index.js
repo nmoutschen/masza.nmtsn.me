@@ -1,14 +1,14 @@
 import world from './world.json';
+import tileset from '../tileset/index.js';
 
 const CHUNK_SIZE = {"width": 128, "height": 128};
-const TILE_SIZE = 32;
 
 function tilesByChunk(tiles, world) {
   // Create the chunk arrays
   var chunks = {};
-  for(var x = 0; x < Math.ceil(world.width*TILE_SIZE/CHUNK_SIZE.width); x++) {
+  for(var x = 0; x < Math.ceil(world.width*tileset.size/CHUNK_SIZE.width); x++) {
     chunks[x] = {};
-    for(var y = 0; y < Math.ceil(world.height*TILE_SIZE/CHUNK_SIZE.height); y++) {
+    for(var y = 0; y < Math.ceil(world.height*tileset.size/CHUNK_SIZE.height); y++) {
       chunks[x][y] = new Array();
     }
   }
@@ -46,70 +46,48 @@ function tilesByChunk(tiles, world) {
 
 var tileCounter = 0;
 class Tile {
-  constructor(tileset, tile) {
-    const tileType = tileset.tiles[tile.type];
+  constructor(tile) {
     // Unique ID for Vue
     this.id = tileCounter++;
   
-    // Background information
-    this.background = {
-      width: tileset.width * TILE_SIZE,
-      height: tileset.height * TILE_SIZE,
-      x: tileType.x * TILE_SIZE,
-      y: tileType.y * TILE_SIZE,
-      img: tileset.img
-    }
-  
-    this.height = tileType.height * TILE_SIZE || 32;
-    this.width = tileType.width * TILE_SIZE || 32;
-
-    this.physics = tile.physics || tileType.physics || "block";
+    this.type = tileset.tiles[tile.type];
+    this.physics = tile.physics || this.type.physics || "block";
     this.pos = {
-      x: tile.x * TILE_SIZE + this.width/2,
-      y: tile.y * TILE_SIZE + this.height
+      x: tile.x * tileset.size + this.type.width/2,
+      y: tile.y * tileset.size + this.type.height
     };
-    this.type = tile.type;
 
     this.box = {
-      left: this.pos.x - this.width/2,
-      right: this.pos.x + this.width/2,
-      top: this.pos.y - this.height,
+      left: this.pos.x - this.type.width/2,
+      right: this.pos.x + this.type.width/2,
+      top: this.pos.y - this.type.height,
       bottom: this.pos.y
-    }
+    };
   }
 
   get style() {
     return `
       position: absolute;
-      background-image: url("${this.background.img}");
-      background-size: ${this.background.width}px ${this.background.height}px;
-      background-position: ${-this.background.x}px ${-this.background.y}px;
+      ${this.type.style}
       top: ${this.box.top}px;
       left: ${this.box.left}px;
-      width: ${this.width}px;
-      height: ${this.height}px;
     `;
   }
 }
 
 function parseWorld(world) {
-  const tileset = require(`@/assets/tilesets/${world.tileset}.json`);
-  tileset.img = require(`@/assets/tilesets/${tileset.img}`);
   const tiles = world.tiles.map((tile) => {
-    return new Tile(
-      tileset,
-      tile
-    )
+    return new Tile(tile);
   });
 
   return {
     start: {
-      x: world.start.x * TILE_SIZE + TILE_SIZE/2 || 0,
-      y: world.start.y * TILE_SIZE + TILE_SIZE || 0
+      x: world.start.x * tileset.size + tileset.size/2 || 0,
+      y: world.start.y * tileset.size + tileset.size || 0
     },
     tileset: tileset,
-    height: world.height * TILE_SIZE || 16,
-    width: world.width * TILE_SIZE || 16,
+    height: world.height * tileset.size || 16,
+    width: world.width * tileset.size || 16,
     tiles: tiles,
     chunks: tilesByChunk(tiles, world),
     tilesWithin({left, top, right, bottom}) {
@@ -135,6 +113,4 @@ function parseWorld(world) {
   }
 }
 
-export default {
-  state: parseWorld(world)
-}
+export default parseWorld(world)

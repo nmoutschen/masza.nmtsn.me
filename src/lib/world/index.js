@@ -44,11 +44,10 @@ function tilesByChunk(tiles, world) {
 }
 
 
-var tileCounter = 0;
 class Tile {
-  constructor(tile) {
+  constructor(id, tile) {
     // Unique ID for Vue
-    this.id = tileCounter++;
+    this.id = id;
   
     this.type = tileset.tiles[tile.type];
     this.physics = tile.physics || this.type.physics || "block";
@@ -75,9 +74,10 @@ class Tile {
   }
 }
 
-function parseWorld(world) {
+export function parseWorld(world) {
+  var counter = 0;
   const tiles = world.tiles.map((tile) => {
-    return new Tile(tile);
+    return new Tile(counter++, tile);
   });
 
   return {

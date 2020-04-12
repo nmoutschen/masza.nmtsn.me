@@ -2,12 +2,12 @@
   <div id="game" :style="gameStyle" :class="{ devMode }">
     <div id="gameView" :style="gameViewStyle">
       <div :style="masza.style"></div>
-      <div v-for="item in items" :key="item.id" :style="item.style" />
+      <div v-for="tile in tiles" :key="tile.id" :style="tile.style" />
     </div>
     <p id="debug" v-if="devMode">
       pos({{ this.$store.state.masza.pos.x }}, {{ this.$store.state.masza.pos.y }})<br/>
       force({{ this.$store.state.masza.force.x }}, {{ this.$store.state.masza.force.y }})<br/>
-      items: {{ items.length }}
+      tiles: {{ tiles.length }}
     </p>
   </div>
 </template>
@@ -26,8 +26,8 @@ export default {
     masza() {
       return this.$store.state.masza;
     },
-    items() {
-      return this.$store.state.game.itemsWithin(this.$store.state.camera.box);
+    tiles() {
+      return this.$store.state.game.tilesWithin(this.$store.state.camera.box);
     },
     devMode() {
       return process.env.NODE_ENV == "development"
